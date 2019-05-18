@@ -1,0 +1,28 @@
+  <!DOCTYPE html>
+    <meta charset="utf-8"> 
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <div class="contailer">
+	<h1>{{title}}</h1>
+
+	<form method="POST" action="/regnew">
+  		<div class="form-group">
+   	 		<label for="email">Email address</label>
+    		<input type="email" class="form-control" id="email"  aria-describedby="emailHelp" placeholder="Enter email"> 
+    		<small id="emailHelp" class="form-text text-muted">We are committed to upholding the latest gdpr.</small>
+  		</div>
+  		<div class="form-group">
+   	 		<label for="username">Username</label>
+    		<input type="text" class="form-control" id="username"  aria-describedby="usernameHelp" placeholder="Enter username"> 
+    		<small id="usernameHelp" class="form-text text-muted">pick a usernbame and we can check if its take</small>
+  		</div>
+ 	 	<div class="form-group">
+    		<label for="password">Password</label>
+   			<input type="password" class="form-control" id="password" placeholder="Password">
+ 		 </div>
+ 		 <div class="form-group">
+    		<label for="passwordMatch"> Re enter Password</label>
+   			<input type="password" class="form-control" id="passwordMatch" placeholder="Password">
+ 		 </div>
+ 		 <button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+</div>
