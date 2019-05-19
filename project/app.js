@@ -4,7 +4,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser= require('body-parser');
+ /*var { check } = require('express-validator/check'); */
 
+
+//Authentification
+var session = require('express-session');
+var passport = require ('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var MySQLStore = require('express-mysql-session')(session);
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -17,15 +24,56 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
-app.use ( bodyParser.json( { type: 'text/*' } ));
+/*app.use ( bodyParser.json( { type: 'text/*' } )); */
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+var options = {
+  host: "mysql1.it.nuigalway.ie",
+  user: "mydb4759tc",
+  password: "rrrfff5948",
+  database: "mydb4759"
+};
+
+var sessionStore = new MySQLStore(options);
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  store: sessionStore,
+  saveUninitialized: true,
+  //cookie: { secure: true }
+}))
+app.use(passport.initialize()); // needs to be below session middleware
+app.use(passport.session());
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    	console.log(username);
+    	console.log(password);
+
+    	 const db = require('./routes/db_connection.js');
+
+    	db.query('SELECT password FROM users WHERE username = ?', [username],
+    		function(err, results, fields){
+    			if (err) {done(err)}; // provided by passport manages errors automatically with db connections
+
+    			if (results.length === 0) {
+    				done (null,false);
+    			}
+    			 return done(null, 'false'); // hasnt been successful 
+    		})
+
+      return done(null, 'ffdd');
+    }
+  
+));
 
 
 // catch 404 and forward to error handler

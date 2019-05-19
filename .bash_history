@@ -52,3 +52,70 @@ npm start
 npm start
 npm start
 npm start
+cd project
+mpn start
+npm start
+npm start
+npm start
+npm start
+git remote add origin https://github.com/Tarpe-Diem/myProject 
+git init
+git commit
+git commit app.js
+git commit -m "first commit"
+git remote add origin https://github.com/Tarpe-Diem/project2.git
+git push -u origin master
+git init
+git commit
+np, start
+npm start
+npm start
+cd project
+npm start
+npm start
+npm start
+npm install mysql
+npm start
+npm install express-validator
+express-validator --save
+npm express-validator --save
+npm install express-validator --save
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+cd project
+npm start
+npm start
+npm start
+npm start
+cd project
+npm start
+npm start
+npm start
+npm install bcrypt --save
+npm stary
+npm start
+npm start
+npm start
+npm start
+npm start
+npm install express-session --save
+npm start
+npm start
+npm install passport
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
+npm start
