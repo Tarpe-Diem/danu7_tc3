@@ -5,11 +5,13 @@ var passport = require ('passport');
 
 var bcrypt = require('bcrypt');
 const saltRounds = 10;
+const mysql = require ('mysql');
 
-
-bodyParser = require('body-parser');
+var bodyParser = require('body-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
-/* var { check, validationResult } = require('express-validator/check');*/ 
+var { check, validationResult } = require('express-validator/check'); 
+
+router.use(bodyParser.json());
 
 
 
@@ -30,6 +32,10 @@ router.get('/profile', authenticationMiddleware (),function(req, res, next) {
   res.render('profile', { title: 'Profile' });
 });
 
+router.get('/testResults', /*authenticationMiddleware ()*/function(req, res, next) {
+  res.render('testResults');
+});
+
 router.get('/login', function(req, res, next) {
     res.render('login'), { title: 'Login' };
 });
@@ -45,28 +51,119 @@ router.post('/login',  passport.authenticate
 	failureRedirect: '/login',
 }));
 
+router.get('/logout', (req, res, next) => {
+	req.logout();
+	req.session.destroy(() => {
+		res.clearCookie('connect.sid');
+		res.redirect('/');
 
-router.get('/registration', function(req, res, next) {
+
+
+	});
+    });
+
+router.get('/viewResults',function(req, res, next) {
+  const db = require('./db_connection.js');
+
+  db.query('SELECT * FROM testResults',function(error, results, fields) {
+    if(error) throw error;
+    
+    var results = results;
+
+
+	console.log;
+	res.send({results : results});
+			});
+    });
+ 
+ router.get('/viewResults/:username',function(req, res, next) {
+  const db = require('./db_connection.js');
+
+  db.query('SELECT * FROM testResults where  username= ?',[req.body.username],function(error, results, fields) {
+    if(error) throw error;
+    
+    var results = results;
+
+
+	console.log;
+	res.send({results : results});
+			});
+    }); 
+
+ 
+router.get('/registration',  function(req, res, next) {
     res.render('registration');
 
 	});
-router.post('/regnew',  function(req, res, next) {
 
-	/*check('username', 'Username field cannot be empty.').notEmpty();
-	check('username', 'Username must be between 4-15 characters long.').len(4, 15);
-	check('email', 'The email you entered is invalid, please try again.').isEmail();
-	check('email', 'Email address must be between 4-100 characters long, please try again.').len(4, 100);
-	check('password', 'Password must be between 8-100 characters long.').len(8, 100);
-	check("password", "Password must include one lowercase character, one uppercase character, a number, and a special character.").matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.* )(?=.*[^a-zA-Z0-9]).{8,}$/, "i");
-	check('passwordMatch', 'Password must be between 8-100 characters long.').len(8, 100);
-	check('passwordMatch', 'Passwords do not match, please try again.').equals(req.body.password);*/	
+router.post('/storeResults',  function(req, res, next) {
 
+	var g1 = req.body.g1;
+	var g2 = req.body.g2;
+	var g3 = req.body.g3;
 	var username = req.body.username;
-	var email = req.body.email;
-	var password = req.body.password;
+		
+
+	/* function myOutcome(g2, g3) {
+              if (tg2 > 7 || g3 > 0) {
+			return 'fail';
+			} else {
+			return'pass';
+			}
+		} 
 	
 
-	console.log(username);
+	console.log(testresult);*/
+
+
+	 const db = require('./db_connection.js');
+
+	
+		db.query('INSERT INTO testResults (username,gradeOne, gradeTwo, gradeThree) VALUES (?,?,?,?)',[username,g1,g2,g3], function(error,result,fields)
+		{
+		if (error) throw error;
+		res.redirect('/home')})
+	});
+
+router.post('/regnew', 
+
+	[check('username')
+    .isLength({ min:1 }).withMessage('Username must be chosen')
+    .isAlphanumeric().withMessage('Username must be a combination of letters and numnbers'),
+	
+	check('password')
+        .isLength({ min:2 }).withMessage('Password must have at least 2 characters')
+        .custom((value, {req, loc, path}) => {
+            if (value !== req.body.passwordMatch) {
+               return false;
+           			}
+               	else {return value;
+               	}
+               } ).withMessage('Passwords dont match')
+            
+        ]
+        ,
+
+		
+	function(req, res, next){
+
+		var errors = validationResult(req);
+   
+ 		/* if (!errors.isEmpty() ){     
+   		 return res.status(422).json({ errors: errors.array() });
+   		} */
+
+   		var error_msg = errors.array();
+        req.flash('error', error_msg);
+        res.render('registration');
+
+
+		var username = req.body.username;
+		var email = req.body.email;
+		var password = req.body.password;
+	
+
+		console.log(username);
 
 
 	 const db = require('./db_connection.js');
@@ -111,7 +208,7 @@ function authenticationMiddleware () {
 			`req.session.passport.user: ${JSON.stringify(req.session.passport)}`);
 
 	    if (req.isAuthenticated()) return next();
-	    res.redirect('/login')
+	    res.redirect('/login');
 	}
 }
 

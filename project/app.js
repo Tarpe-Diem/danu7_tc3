@@ -4,7 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser= require('body-parser');
- /*var { check } = require('express-validator/check'); */
+var { check,validationResult } = require('express-validator/check');
+var flash = require('express-flash');
 
 
 //Authentification
@@ -12,6 +13,7 @@ var session = require('express-session');
 var passport = require ('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var MySQLStore = require('express-mysql-session')(session);
+var bcrypt = require('bcrypt');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -24,9 +26,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
-/*app.use ( bodyParser.json( { type: 'text/*' } )); */
+app.use ( bodyParser.json( { type: 'text/*' } )); 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -43,13 +45,17 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false,
   store: sessionStore,
-  saveUninitialized: true,
+  saveUninitialized: false,
   //cookie: { secure: true }
 }))
 app.use(passport.initialize()); // needs to be below session middleware
 app.use(passport.session());
 
-
+app.use(function(req,res,next){
+	res.locals.isAuthenticated = req.
+		isAuthenticated();
+	next();
+})
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
@@ -60,17 +66,29 @@ passport.use(new LocalStrategy(
 
     	 const db = require('./routes/db_connection.js');
 
-    	db.query('SELECT password FROM users WHERE username = ?', [username],
+    	db.query('SELECT id, password FROM Users WHERE username = ?', [username],
     		function(err, results, fields){
     			if (err) {done(err)}; // provided by passport manages errors automatically with db connections
 
     			if (results.length === 0) {
     				done (null,false);
-    			}
-    			 return done(null, 'false'); // hasnt been successful 
-    		})
+    			} else {
 
-      return done(null, 'ffdd');
+    				const hash = results[0].password.toString();
+
+    				bcrypt.compare(password, hash, function(err, response){
+    					if (response === true){
+    						return done(null, {user_id: results[0].id});  //pass through an object with prop of user id that is equal to id grabbed from db 
+    					} else {
+    						return done (null, false)// if it doesnt work 
+    					}
+
+
+    			 });
+    			 
+    		}
+
+      })
     }
   
 ));
